@@ -1,114 +1,166 @@
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-    --bg-gradient: linear-gradient(135deg, #f5f0ff 0%, #e8e2f5 50%, #f5f0ff 100%);
-    --purple-glass: rgba(156, 78, 221, 0.15);
+    --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    --purple-light: #9d4edd;
     --purple-neon: #7b2cbf;
-    --cyan-glass: rgba(0, 245, 212, 0.2);
-    --cyan-neon: #00b4a0;
-    --glass-bg: rgba(255, 255, 255, 0.7);
-    --glass-border: rgba(156, 78, 221, 0.2);
-    --text-color: #2d2d5e;
-    --text-light: #6c6c8a;
+    --purple-dark: #5a189a;
+    --purple-glass: rgba(157, 78, 221, 0.15);
+    --cyan-neon: #00f5d4;
+    --glass-bg: rgba(255, 255, 255, 0.08);
+    --glass-bg-strong: rgba(255, 255, 255, 0.12);
+    --glass-border: rgba(157, 78, 221, 0.3);
+    --text-color: #ffffff;
+    --text-light: rgba(255, 255, 255, 0.7);
+    --text-dark: rgba(255, 255, 255, 0.5);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
     background: var(--bg-gradient);
     color: var(--text-color);
     font-family: 'Poppins', sans-serif;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     min-height: 100vh;
+    position: relative;
 }
 
-/* Navegación Glassy Light */
+/* Efecto de vidrio en el fondo */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle at 20% 50%, rgba(157, 78, 221, 0.08), transparent 50%);
+    pointer-events: none;
+}
+
+/* Navegación Glassy */
 nav {
     width: 90%;
     max-width: 1200px;
-    margin-top: 20px;
+    margin: 20px auto 0;
     background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
     border: 1px solid var(--glass-border);
-    border-radius: 60px;
-    padding: 15px 30px;
+    border-radius: 80px;
+    padding: 12px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    position: fixed;
+    position: sticky;
     top: 20px;
-    left: 50%;
-    transform: translateX(-50%);
     z-index: 100;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .nav-logo {
-    font-weight: 900;
-    font-size: 1.4rem;
+    font-weight: 800;
+    font-size: 1.3rem;
     text-decoration: none;
-    background: linear-gradient(135deg, #7b2cbf, #00b4a0);
+    background: linear-gradient(135deg, var(--purple-light), var(--cyan-neon));
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     letter-spacing: 2px;
 }
 
+.nav-auth-btns {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
 .btn-nav {
     background: transparent;
-    border: 1px solid var(--purple-neon);
-    color: var(--purple-neon);
+    border: 1px solid var(--purple-light);
+    color: var(--purple-light);
     padding: 8px 20px;
     border-radius: 40px;
     font-weight: 600;
     cursor: pointer;
-    margin-left: 10px;
     transition: all 0.3s ease;
 }
 
 .btn-nav:hover {
-    background: var(--purple-neon);
+    background: var(--purple-light);
     color: white;
     transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.5);
 }
 
-/* Escenario Principal Glassy Light */
+/* Contenedor principal */
 .main-content {
-    margin-top: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 100px);
+    padding: 20px;
 }
 
+/* Tarjeta del Trono - Glassy premium */
 .stage {
     text-align: center;
     width: 100%;
-    max-width: 450px;
-    padding: 40px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    max-width: 500px;
+    padding: 35px;
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
     border: 1px solid var(--glass-border);
-    border-radius: 32px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+    border-radius: 48px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
 }
 
-h1, h2 {
-    margin: 0 0 20px 0;
-    background: linear-gradient(135deg, #7b2cbf, #00b4a0);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+/* Contenedor de saldo */
+.saldo-container {
+    background: rgba(157, 78, 221, 0.2);
+    border-radius: 60px;
+    padding: 10px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(157, 78, 221, 0.3);
 }
 
-/* Marco de foto glassy light */
+.saldo-label {
+    font-weight: 600;
+    color: var(--cyan-neon);
+}
+
+.saldo-valor {
+    font-weight: 800;
+    font-size: 1.3rem;
+    color: var(--purple-light);
+}
+
+/* Título del rey */
+h1 {
+    font-size: 2.2rem;
+    margin: 20px 0;
+    text-shadow: 0 0 20px rgba(157, 78, 221, 0.5);
+    letter-spacing: 2px;
+}
+
+/* Marco del retrato */
 .portrait-frame {
-    width: 180px;
-    height: 180px;
-    margin: 0 auto 25px;
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 20px;
     border-radius: 50%;
-    border: 3px solid var(--purple-neon);
+    border: 3px solid var(--purple-light);
     overflow: hidden;
-    box-shadow: 0 4px 20px rgba(123, 44, 191, 0.3);
+    box-shadow: 0 0 30px rgba(157, 78, 221, 0.4);
+    background: rgba(0, 0, 0, 0.3);
 }
 
 .portrait-img {
@@ -117,17 +169,18 @@ h1, h2 {
     object-fit: cover;
 }
 
+/* Precio */
 .price-label {
-    font-size: 2.5rem;
-    font-weight: 900;
-    color: var(--purple-neon);
-    margin: 20px 0;
-    text-shadow: 0 2px 10px rgba(123, 44, 191, 0.2);
+    font-size: 2.8rem;
+    font-weight: 800;
+    color: var(--purple-light);
+    margin: 15px 0;
+    text-shadow: 0 0 15px rgba(157, 78, 221, 0.5);
 }
 
-/* Botón Neón versión Light */
+/* Botón principal */
 .buy-button {
-    background: linear-gradient(135deg, #7b2cbf, #00b4a0);
+    background: linear-gradient(135deg, var(--purple-neon), var(--purple-dark));
     color: white;
     border: none;
     padding: 14px 40px;
@@ -136,31 +189,175 @@ h1, h2 {
     border-radius: 50px;
     cursor: pointer;
     text-transform: uppercase;
-    box-shadow: 0 4px 15px rgba(123, 44, 191, 0.4);
+    box-shadow: 0 5px 20px rgba(123, 44, 191, 0.4);
     transition: all 0.3s ease;
+    margin: 15px 0;
 }
 
 .buy-button:hover {
     transform: scale(1.05);
-    box-shadow: 0 6px 25px rgba(123, 44, 191, 0.6);
+    box-shadow: 0 8px 30px rgba(157, 78, 221, 0.6);
+    background: linear-gradient(135deg, var(--purple-light), var(--purple-neon));
 }
 
+/* Footer texto */
 .footer-text {
-    margin-top: 20px;
+    margin: 15px 0;
     font-size: 0.9rem;
     color: var(--text-light);
-    font-weight: 500;
 }
 
-/* Modales y Formularios Glassy Light */
+/* ========== SECCIÓN DE PUBLICACIONES ========== */
+.publicaciones-section {
+    margin-top: 30px;
+    text-align: left;
+    border-top: 1px solid var(--glass-border);
+    padding-top: 20px;
+}
+
+.publicaciones-section h3 {
+    text-align: center;
+    color: var(--purple-light);
+    margin-bottom: 15px;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+}
+
+/* Contenedor de mensajes */
+#listaPublicaciones {
+    max-height: 280px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    padding-right: 5px;
+}
+
+/* Scroll personalizado */
+#listaPublicaciones::-webkit-scrollbar {
+    width: 5px;
+}
+
+#listaPublicaciones::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+}
+
+#listaPublicaciones::-webkit-scrollbar-thumb {
+    background: var(--purple-light);
+    border-radius: 10px;
+}
+
+/* Cada publicación */
+.publicacion-item {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border-radius: 20px;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid rgba(157, 78, 221, 0.2);
+    transition: all 0.2s ease;
+}
+
+.publicacion-item:hover {
+    border-color: rgba(157, 78, 221, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.publicacion-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.publicacion-rey {
+    font-weight: 700;
+    color: var(--purple-light);
+}
+
+.publicacion-fecha {
+    font-size: 0.7rem;
+    color: var(--text-dark);
+}
+
+.publicacion-contenido {
+    word-wrap: break-word;
+    line-height: 1.4;
+    color: var(--text-color);
+}
+
+.publicacion-eliminar {
+    background: none;
+    border: none;
+    color: #ff6b6b;
+    cursor: pointer;
+    font-size: 1rem;
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.publicacion-eliminar:hover {
+    opacity: 1;
+}
+
+/* Formulario de publicación */
+#formPublicar {
+    margin-top: 15px;
+    padding: 15px;
+    background: rgba(157, 78, 221, 0.1);
+    backdrop-filter: blur(10px);
+    border-radius: 24px;
+    border: 1px solid rgba(157, 78, 221, 0.2);
+}
+
+#contenidoPublicacion {
+    width: 100%;
+    padding: 12px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-color);
+    resize: vertical;
+    font-family: inherit;
+    font-size: 0.9rem;
+}
+
+#contenidoPublicacion:focus {
+    outline: none;
+    border-color: var(--purple-light);
+}
+
+#enlacePublicacion {
+    flex: 1;
+    padding: 10px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-color);
+    font-size: 0.85rem;
+}
+
+#enlacePublicacion:focus {
+    outline: none;
+    border-color: var(--purple-light);
+}
+
+/* Botón de recarga */
+.recarga-btn {
+    background: linear-gradient(135deg, var(--cyan-neon), #00b4a0);
+    border: none;
+    font-size: 0.8rem;
+    padding: 8px 15px;
+}
+
+/* ========== MODAL ========== */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(4px);
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
     display: none;
     justify-content: center;
     align-items: center;
@@ -168,13 +365,19 @@ h1, h2 {
 }
 
 .modal-content {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(20px);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(30px);
     border: 1px solid var(--glass-border);
-    border-radius: 32px;
+    border-radius: 40px;
     padding: 35px;
-    width: 350px;
-    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    width: 380px;
+    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h2 {
+    text-align: center;
+    color: var(--purple-light);
+    margin-bottom: 20px;
 }
 
 .close-modal {
@@ -188,61 +391,53 @@ h1, h2 {
 }
 
 .close-modal:hover {
-    color: var(--purple-neon);
+    color: var(--purple-light);
 }
 
+/* Inputs */
 .input-jojo {
     width: 100%;
     padding: 14px;
     margin: 10px 0;
-    background: rgba(123, 44, 191, 0.05);
+    background: rgba(255, 255, 255, 0.08);
     border: 1px solid var(--glass-border);
-    border-radius: 16px;
+    border-radius: 20px;
     color: var(--text-color);
     font-size: 0.9rem;
     outline: none;
     transition: all 0.3s ease;
-    box-sizing: border-box;
 }
 
 .input-jojo:focus {
-    border-color: var(--purple-neon);
-    box-shadow: 0 0 0 3px rgba(123, 44, 191, 0.1);
+    border-color: var(--purple-light);
+    box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.2);
 }
 
-/* Botón recarga */
-.recarga-btn {
-    background: linear-gradient(135deg, #00b4a0, #7b2cbf);
-    font-size: 0.8rem;
-    padding: 8px 15px;
-    margin-top: 10px;
-}
-
-/* Responsive para tabla en móviles */
-@media (max-width: 768px) {
-    .historial-container {
-        margin: 100px 15px 30px;
-        padding: 15px;
+/* Responsive */
+@media (max-width: 550px) {
+    .stage {
+        margin: 0 15px;
+        padding: 25px;
     }
     
-    .tabla-historial {
-        font-size: 0.8rem;
+    h1 {
+        font-size: 1.6rem;
     }
     
-    .tabla-historial th,
-    .tabla-historial td {
-        padding: 8px 5px;
+    .price-label {
+        font-size: 2.2rem;
     }
     
     .nav-auth-btns {
-        display: flex;
         gap: 5px;
-        flex-wrap: wrap;
-        justify-content: flex-end;
     }
     
     .btn-nav {
-        padding: 5px 10px;
+        padding: 5px 12px;
         font-size: 0.7rem;
+    }
+    
+    .nav-logo {
+        font-size: 1rem;
     }
 }

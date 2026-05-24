@@ -9,46 +9,60 @@
 </head>
 <body>
 
-   <nav>
+<nav>
     <a href="index.html" class="nav-logo">TRONO DIGITAL</a>
-    <div class="nav-auth-btns" id="authContainer">
-        <!-- Este contenido lo llena script.js automáticamente -->
-    </div>
+    <div class="nav-auth-btns" id="authContainer"></div>
 </nav>
 
-    <div class="main-content">
-        <div class="stage">
-            <div id="saldoContainer" style="margin-bottom: 20px; padding: 10px; background: rgba(123, 44, 191, 0.1); border-radius: 16px;">
-    <span style="font-weight: bold;">💰 Mi saldo:</span>
-    <span id="miSaldo" style="font-weight: 900; color: #7b2cbf;">---</span>
-</div>
-            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
-    <button class="buy-button" style="background: var(--purple-neon); border-color: var(--purple-neon); font-size: 0.8rem; padding: 8px 15px;" onclick="recargarSaldo()">➕ Recargar $50</button>
-</div>
-            <header>
-                <h1 id="reyNombre">CARGANDO...</h1>
-            </header>
+<div class="main-content">
+    <div class="stage">
+        <!-- Barra de saldo integrada -->
+        <div class="saldo-container">
+            <span class="saldo-label">💰 Mi saldo:</span>
+            <span class="saldo-valor" id="miSaldo">---</span>
+            <button class="buy-button recarga-btn" onclick="recargarSaldo()">➕ Recargar $50</button>
+        </div>
 
-            <div class="portrait-frame">
-                <img src="https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg" class="portrait-img" alt="King">
-            </div>
+        <header>
+            <h1 id="reyNombre">CARGANDO...</h1>
+        </header>
 
-            <div class="price-label" id="reyPrecio">$0.00</div>
+        <div class="portrait-frame">
+            <img src="https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg" class="portrait-img" alt="King">
+        </div>
+
+        <div class="price-label" id="reyPrecio">$0.00</div>
+        
+        <button class="buy-button" id="btnDerrocar">Derrocar Trono</button>
+
+        <div class="footer-text" id="detallesPrecio">
+            Precio para derrocar: --
+        </div>
+
+        <!-- Publicaciones dentro del stage -->
+        <div class="publicaciones-section">
+            <h3>📜 MENSAJES DEL TRONO</h3>
             
-            <button class="buy-button" id="btnDerrocar">Derrocar Trono</button>
-
-            <div class="footer-text" id="detallesPrecio">
-                Próximo precio: --
+            <div id="listaPublicaciones">
+                <div class="loading-pub">Cargando mensajes...</div>
+            </div>
+            
+            <div id="formPublicar">
+                <textarea id="contenidoPublicacion" placeholder="Escribe un mensaje para el reino..."></textarea>
+                <div class="publicar-input-group">
+                    <input type="text" id="enlacePublicacion" placeholder="Enlace (opcional - YouTube, etc.)">
+                    <button onclick="publicarEnTrono()" class="buy-button">📢 Publicar</button>
+                </div>
             </div>
         </div>
     </div>
+</div>
 
-<!-- Modal - Cambia style display: none por defecto -->
+<!-- Modal -->
 <div id="loginModal" class="modal-overlay" style="display: none;">
     <div class="modal-content">
         <button class="close-modal" onclick="toggleModal()">×</button>
         <h2>ENTRAR AL TRONO</h2>
-        
         <form id="loginForm">
             <input type="email" name="email" placeholder="TU EMAIL" class="input-jojo" required>
             <input type="password" name="password" placeholder="CONTRASEÑA" class="input-jojo" required>
@@ -57,25 +71,6 @@
     </div>
 </div>
 
-<!-- SECCIÓN DE PUBLICACIONES DEL TRONO -->
-<div class="publicaciones-section" style="margin-top: 30px; text-align: left;">
-    <h3 style="text-align: center; color: #7b2cbf;">📜 MENSAJES DEL TRONO</h3>
-    
-    <!-- Lista de publicaciones -->
-    <div id="listaPublicaciones" style="max-height: 300px; overflow-y: auto;">
-        <div class="loading-pub" style="text-align: center; padding: 20px;">Cargando mensajes...</div>
-    </div>
-    
-    <!-- Formulario para publicar (solo visible para el rey) -->
-    <div id="formPublicar" style="display: none; margin-top: 20px; padding: 15px; background: rgba(123, 44, 191, 0.1); border-radius: 16px;">
-        <textarea id="contenidoPublicacion" placeholder="Escribe un mensaje para el reino..." style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-color); resize: vertical;"></textarea>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <input type="text" id="enlacePublicacion" placeholder="Enlace (opcional - YouTube, etc.)" style="flex: 1; padding: 8px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-color);">
-            <button onclick="publicarEnTrono()" class="buy-button" style="padding: 8px 20px; font-size: 0.8rem;">📢 Publicar</button>
-        </div>
-    </div>
-</div>
-
-    <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
