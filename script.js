@@ -10,7 +10,6 @@ function actualizarUIPorSesion() {
     const modal = document.getElementById('loginModal');
     
     if (username) {
-        // Usuario logueado - muestra nombre, historial y salir
         authContainer.innerHTML = `
             <span style="font-weight:900; color: #6c5ce7;">👑 ${username.toUpperCase()}</span>
             <button class="btn-nav" onclick="window.location.href='historial.html'">📜 Historial</button>
@@ -19,12 +18,17 @@ function actualizarUIPorSesion() {
         
         if (modal) modal.style.display = 'none';
         mostrarSaldo();
+        
+        // ✅ CARGAR PUBLICACIONES Y VERIFICAR SI ES REY
+        cargarPublicaciones();
+        verificarSiEsRey();
     } else {
-        // Usuario no logueado
         authContainer.innerHTML = `
             <button class="btn-nav" onclick="toggleModal()">Entrar</button>
             <button class="btn-nav" style="border-color: #6c5ce7;" onclick="window.location.href='registro.html'">Unirse</button>
         `;
+        // Si no hay sesión, igual mostrar publicaciones (solo lectura)
+        cargarPublicaciones();
     }
 }
 
@@ -175,6 +179,155 @@ async function mostrarSaldo() {
         } catch (err) {
             console.error("Error al obtener saldo:", err);
         }
+    }
+}
+
+// ========== FUNCIONES DE PUBLICACIONES ==========
+
+// Cargar y mostrar publicaciones
+async function cargarPublicaciones() {
+    const contenedor = document.getElementById('listaPublicaciones');
+    if (!contenedor) return;
+    
+    try {
+        const response = await fetch('/api/publicaciones');
+        const publicaciones = await response.json();
+        
+        if (publicaciones.length === 0) {
+            contenedor.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-light);">📭 Aún no hay mensajes en el trono. ¡El rey puede publicar!</div>';
+            return;
+        }
+        
+        let html = '';
+        for (const pub of publicaciones) {
+            const fecha = new Date(pub.fecha).toLocaleString('es-ES');
+            const esAutorOMiPublicacion = (localStorage.getItem('userId') === pub.rey_id);
+            
+            let contenidoHtml = '';
+            if (pub.tipo === 'enlace' && pub.enlace) {
+                // Si es un enlace, mostrarlo embebido o como link
+                if (pub.enlace.includes('youtube.com/watch') || pub.enlace.includes('youtu.be')) {
+                    // Embed de YouTube
+                    let videoId = pub.enlace.split('v=')[1]?.split('&')[0] || pub.enlace.split('/').pop();
+                    contenidoHtml = `
+                        <div style="margin-top: 8px;">
+                            <iframe width="100%" height="180" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius: 12px;"></iframe>
+                        </div>
+                    `;
+                } else {
+                    contenidoHtml = `<div style="margin-top: 8px;"><a href="${pub.enlace}" target="_blank" style="color: var(--cyan-neon);">🔗 ${pub.enlace}</a></div>`;
+                }
+            }
+            
+            html += `
+                <div class="publicacion-item" style="background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <div>
+                            <strong style="color: #7b2cbf;">👑 ${pub.rey_username}</strong>
+                            <span style="font-size: 0.7rem; color: var(--text-light); margin-left: 10px;">${fecha}</span>
+                        </div>
+                        ${esAutorOMiPublicacion ? `<button onclick="eliminarPublicacion('${pub._id}')" style="background: none; border: none; color: #ff4444; cursor: pointer;">🗑️</button>` : ''}
+                    </div>
+                    <div style="word-wrap: break-word;">${escapeHtml(pub.contenido)}</div>
+                    ${contenidoHtml}
+                </div>
+            `;
+        }
+        contenedor.innerHTML = html;
+        
+    } catch (err) {
+        console.error("Error cargando publicaciones:", err);
+        contenedor.innerHTML = '<div style="text-align: center; padding: 20px; color: red;">❌ Error al cargar mensajes</div>';
+    }
+}
+
+// Función para escapar HTML (seguridad)
+function escapeHtml(texto) {
+    const div = document.createElement('div');
+    div.textContent = texto;
+    return div.innerHTML;
+}
+
+// Publicar en el trono
+async function publicarEnTrono() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        alert("Debes iniciar sesión para publicar");
+        return;
+    }
+    
+    const contenido = document.getElementById('contenidoPublicacion').value.trim();
+    const enlace = document.getElementById('enlacePublicacion').value.trim();
+    
+    if (!contenido) {
+        alert("Escribe un mensaje");
+        return;
+    }
+    
+    const tipo = enlace ? 'enlace' : 'texto';
+    
+    try {
+        const response = await fetch('/api/publicar', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, contenido, tipo, enlace: enlace || null })
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            alert("✅ Mensaje publicado en el trono");
+            document.getElementById('contenidoPublicacion').value = '';
+            document.getElementById('enlacePublicacion').value = '';
+            cargarPublicaciones(); // Recargar
+        } else {
+            alert("❌ " + result.error);
+        }
+    } catch (err) {
+        console.error("Error:", err);
+        alert("Error al publicar");
+    }
+}
+
+// Eliminar publicación
+async function eliminarPublicacion(publicacionId) {
+    if (!confirm("¿Eliminar este mensaje?")) return;
+    
+    const userId = localStorage.getItem('userId');
+    
+    try {
+        const response = await fetch(`/api/publicaciones/${publicacionId}`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId })
+        });
+        
+        const result = await response.json();
+        if (result.success) {
+            cargarPublicaciones();
+        } else {
+            alert("❌ " + result.error);
+        }
+    } catch (err) {
+        alert("Error al eliminar");
+    }
+}
+
+// Mostrar/ocultar formulario de publicación según si es rey
+async function verificarSiEsRey() {
+    const userId = localStorage.getItem('userId');
+    const formPublicar = document.getElementById('formPublicar');
+    
+    if (!userId || !formPublicar) return;
+    
+    try {
+        const response = await fetch('/api/trono');
+        const trono = await response.json();
+        
+        const esRey = trono.rey_actual.user_id && trono.rey_actual.user_id.toString() === userId;
+        formPublicar.style.display = esRey ? 'block' : 'none';
+    } catch (err) {
+        console.error("Error verificando rey:", err);
     }
 }
 

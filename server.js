@@ -41,6 +41,18 @@ const TransactionSchema = new mongoose.Schema({
     fecha: { type: Date, default: Date.now }
 }, { versionKey: false });
 
+// MODELO DE PUBLICACIONES DEL TRONO
+const PublicacionSchema = new mongoose.Schema({
+    rey_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    rey_username: { type: String, required: true },
+    contenido: { type: String, required: true },
+    tipo: { type: String, default: 'texto' }, // texto, enlace
+    enlace: { type: String }, // si es un enlace (YouTube, etc.)
+    fecha: { type: Date, default: Date.now }
+}, { versionKey: false });
+
+const Publicacion = mongoose.model('Publicacion', PublicacionSchema);
+
 const User = mongoose.model('User', UserSchema);
 const Throne = mongoose.model('Throne', ThroneSchema);
 const Transaction = mongoose.model('Transaction', TransactionSchema);
@@ -247,6 +259,92 @@ app.get('/api/historial', async (req, res) => {
             .limit(20)
             .populate('usuario_id', 'username');
         res.json(historial);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// ========== RUTAS DE PUBLICACIONES ==========
+
+// 8. Obtener todas las publicaciones del trono
+app.get('/api/publicaciones', async (req, res) => {
+    try {
+        const publicaciones = await Publicacion.find()
+            .sort({ fecha: -1 })
+            .limit(30);
+        res.json(publicaciones);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// 9. El rey publica un mensaje (solo si ES el rey actual)
+app.post('/api/publicar', async (req, res) => {
+    const { userId, contenido, tipo, enlace } = req.body;
+    
+    if (!userId || !contenido) {
+        return res.status(400).json({ error: "Faltan datos" });
+    }
+    
+    try {
+        // Verificar que el usuario existe
+        const usuario = await User.findById(userId);
+        if (!usuario) {
+            return res.status(404).json({ error: "Usuario no encontrado" });
+        }
+        
+        // Verificar que el usuario ES el rey actual
+        const trono = await Throne.findOne({ id_trono: "principal" });
+        if (!trono || trono.rey_actual.user_id?.toString() !== userId) {
+            return res.status(403).json({ error: "Solo el rey actual puede publicar en el trono" });
+        }
+        
+        // Crear la publicación
+        const nuevaPublicacion = new Publicacion({
+            rey_id: userId,
+            rey_username: usuario.username,
+            contenido: contenido,
+            tipo: tipo || 'texto',
+            enlace: enlace || null
+        });
+        
+        await nuevaPublicacion.save();
+        
+        res.json({ 
+            success: true, 
+            mensaje: "Publicado en el trono",
+            publicacion: nuevaPublicacion
+        });
+        
+    } catch (err) {
+        console.error("Error al publicar:", err);
+        res.status(500).json({ error: "Error al publicar: " + err.message });
+    }
+});
+
+// 10. Eliminar publicación (solo el rey actual o el que publicó)
+app.delete('/api/publicaciones/:id', async (req, res) => {
+    const { userId } = req.body;
+    const publicacionId = req.params.id;
+    
+    try {
+        const publicacion = await Publicacion.findById(publicacionId);
+        if (!publicacion) {
+            return res.status(404).json({ error: "Publicación no encontrada" });
+        }
+        
+        // Verificar que quien borra es el rey actual O el autor
+        const trono = await Throne.findOne({ id_trono: "principal" });
+        const esReyActual = trono?.rey_actual.user_id?.toString() === userId;
+        const esAutor = publicacion.rey_id.toString() === userId;
+        
+        if (!esReyActual && !esAutor) {
+            return res.status(403).json({ error: "No tienes permiso para borrar esto" });
+        }
+        
+        await Publicacion.findByIdAndDelete(publicacionId);
+        res.json({ success: true, mensaje: "Publicación eliminada" });
+        
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

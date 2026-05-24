@@ -57,6 +57,25 @@
     </div>
 </div>
 
+<!-- SECCIÓN DE PUBLICACIONES DEL TRONO -->
+<div class="publicaciones-section" style="margin-top: 30px; text-align: left;">
+    <h3 style="text-align: center; color: #7b2cbf;">📜 MENSAJES DEL TRONO</h3>
+    
+    <!-- Lista de publicaciones -->
+    <div id="listaPublicaciones" style="max-height: 300px; overflow-y: auto;">
+        <div class="loading-pub" style="text-align: center; padding: 20px;">Cargando mensajes...</div>
+    </div>
+    
+    <!-- Formulario para publicar (solo visible para el rey) -->
+    <div id="formPublicar" style="display: none; margin-top: 20px; padding: 15px; background: rgba(123, 44, 191, 0.1); border-radius: 16px;">
+        <textarea id="contenidoPublicacion" placeholder="Escribe un mensaje para el reino..." style="width: 100%; padding: 10px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-color); resize: vertical;"></textarea>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <input type="text" id="enlacePublicacion" placeholder="Enlace (opcional - YouTube, etc.)" style="flex: 1; padding: 8px; border-radius: 12px; border: 1px solid var(--glass-border); background: var(--glass-bg); color: var(--text-color);">
+            <button onclick="publicarEnTrono()" class="buy-button" style="padding: 8px 20px; font-size: 0.8rem;">📢 Publicar</button>
+        </div>
+    </div>
+</div>
+
     <script src="script.js"></script>
 </body>
 </html>
