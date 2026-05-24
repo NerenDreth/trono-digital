@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>El Trono Digital - Glassy Purple</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+   <nav>
+    <a href="index.html" class="nav-logo">TRONO DIGITAL</a>
+    <div class="nav-auth-btns" id="authContainer">
+        <!-- Este contenido lo llena script.js automáticamente -->
+    </div>
+</nav>
+
+    <div class="main-content">
+        <div class="stage">
+            <div id="saldoContainer" style="margin-bottom: 20px; padding: 10px; background: rgba(123, 44, 191, 0.1); border-radius: 16px;">
+    <span style="font-weight: bold;">💰 Mi saldo:</span>
+    <span id="miSaldo" style="font-weight: 900; color: #7b2cbf;">---</span>
+</div>
+            <div style="margin-top: 20px; display: flex; gap: 10px; justify-content: center;">
+    <button class="buy-button" style="background: var(--purple-neon); border-color: var(--purple-neon); font-size: 0.8rem; padding: 8px 15px;" onclick="recargarSaldo()">➕ Recargar $50</button>
+</div>
+            <header>
+                <h1 id="reyNombre">CARGANDO...</h1>
+            </header>
+
+            <div class="portrait-frame">
+                <img src="https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg" class="portrait-img" alt="King">
+            </div>
+
+            <div class="price-label" id="reyPrecio">$0.00</div>
+            
+            <button class="buy-button" id="btnDerrocar">Derrocar Trono</button>
+
+            <div class="footer-text" id="detallesPrecio">
+                Próximo precio: --
+            </div>
+        </div>
+    </div>
+
+<!-- Modal - Cambia style display: none por defecto -->
+<div id="loginModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <button class="close-modal" onclick="toggleModal()">×</button>
+        <h2>ENTRAR AL TRONO</h2>
+        
+        <form id="loginForm">
+            <input type="email" name="email" placeholder="TU EMAIL" class="input-jojo" required>
+            <input type="password" name="password" placeholder="CONTRASEÑA" class="input-jojo" required>
+            <button type="submit" class="buy-button" style="width: 100%; margin-top: 20px;">ACCEDER</button>
+        </form>
+    </div>
+</div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Unirse al Trono - Registro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-logo">TRONO DIGITAL</a>
+        <div class="nav-auth-btns">
+            <a href="index.html" class="btn-nav">Volver</a>
+        </div>
+    </nav>
+
+    <div class="main-content">
+        <div class="stage" style="max-width: 350px;">
+            <header>
+                <h2>NUEVO ASPIRANTE</h2>
+            </header>
+
+            <form id="registroForm">
+                <input type="text" name="username" placeholder="NOMBRE DE GUERRERO" class="input-jojo" required>
+                <input type="email" name="email" placeholder="TU EMAIL" class="input-jojo" required>
+                <input type="password" name="password" placeholder="CONTRASEÑA" class="input-jojo" required>
+                <button type="submit" class="buy-button" style="width: 100%; margin-top: 20px;">CREAR CUENTA</button>
+            </form>
+            <div id="mensajeRegistro" style="margin-top: 15px; font-weight: 700; display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('registroForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const data = Object.fromEntries(new FormData(this));
+
+            fetch('/api/registro', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+            .then(res => res.text())
+            .then(data => {
+                const msg = document.getElementById('mensajeRegistro');
+                msg.style.display = "block";
+                if(data.trim() === "success") {
+                    msg.style.color = "var(--cyan-neon)";
+                    msg.innerText = "¡CUENTA CREADA! REDIRIGIENDO...";
+                    setTimeout(() => { window.location.href = 'index.html'; }, 2000);
+                } else {
+                    msg.style.color = "red";
+                    msg.innerText = data;
+                }
+            });
+        });
+    </script>
+</body>
+</html>

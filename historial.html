@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Historial - Trono Digital</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .historial-container {
+            max-width: 800px;
+            margin: 120px auto 40px;
+            padding: 30px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 32px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .historial-title {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .historial-title h1 {
+            background: linear-gradient(135deg, #7b2cbf, #00b4a0);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .tabla-historial {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .tabla-historial th {
+            background: rgba(123, 44, 191, 0.2);
+            padding: 12px;
+            text-align: left;
+            border-radius: 12px 12px 0 0;
+            color: #7b2cbf;
+            font-weight: bold;
+        }
+
+        .tabla-historial td {
+            padding: 12px;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .tabla-historial tr:hover {
+            background: rgba(123, 44, 191, 0.05);
+        }
+
+        .tipo-derrocamiento {
+            color: #dc2626;
+            font-weight: bold;
+        }
+
+        .tipo-reembolso {
+            color: #10b981;
+            font-weight: bold;
+        }
+
+        .tipo-recarga {
+            color: #3b82f6;
+            font-weight: bold;
+        }
+
+        .monto-negativo {
+            color: #dc2626;
+        }
+
+        .monto-positivo {
+            color: #10b981;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 1.2rem;
+            color: var(--text-light);
+        }
+
+        .volver-btn {
+            display: inline-block;
+            margin-top: 20px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .empty-message {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+    </style>
+</head>
+<body>
+
+    <nav>
+        <a href="index.html" class="nav-logo">TRONO DIGITAL</a>
+        <div class="nav-auth-btns" id="authContainer">
+            <button class="btn-nav" onclick="window.location.href='index.html'">Inicio</button>
+            <button class="btn-nav" onclick="window.location.href='historial.html'" style="border-color: #7b2cbf;">Historial</button>
+        </div>
+    </nav>
+
+    <div class="historial-container">
+        <div class="historial-title">
+            <h1>📜 HISTORIAL DEL TRONO</h1>
+            <p>Todas las transacciones y derrocamientos</p>
+        </div>
+
+        <div id="historialContent">
+            <div class="loading">⏳ Cargando historial...</div>
+        </div>
+
+        <div class="volver-btn">
+            <button class="buy-button" onclick="window.location.href='index.html'" style="padding: 10px 30px;">← Volver al Trono</button>
+        </div>
+    </div>
+
+    <script>
+        // Verificar sesión para mostrar nombre de usuario en nav
+        function actualizarNav() {
+            const username = localStorage.getItem('username');
+            const authContainer = document.getElementById('authContainer');
+            
+            if (username) {
+                authContainer.innerHTML = `
+                    <span style="font-weight:900; color: #6c5ce7;">👑 ${username.toUpperCase()}</span>
+                    <button class="btn-nav" onclick="window.location.href='index.html'">Inicio</button>
+                    <button class="btn-nav" onclick="window.location.href='historial.html'" style="border-color: #7b2cbf;">Historial</button>
+                    <button class="btn-nav" onclick="logout()" style="margin-left:5px;">Salir</button>
+                `;
+            } else {
+                authContainer.innerHTML = `
+                    <button class="btn-nav" onclick="window.location.href='index.html'">Inicio</button>
+                    <button class="btn-nav" onclick="window.location.href='historial.html'" style="border-color: #7b2cbf;">Historial</button>
+                    <button class="btn-nav" onclick="toggleModal()">Entrar</button>
+                    <button class="btn-nav" style="border-color: #7b2cbf;" onclick="window.location.href='registro.html'">Unirse</button>
+                `;
+            }
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = 'index.html';
+        }
+
+        function toggleModal() {
+            window.location.href = 'index.html';
+        }
+
+        // Cargar historial desde el servidor
+        async function cargarHistorial() {
+            const contentDiv = document.getElementById('historialContent');
+            
+            try {
+                const response = await fetch('/api/historial');
+                const historial = await response.json();
+                
+                if (historial.length === 0) {
+                    contentDiv.innerHTML = `
+                        <div class="empty-message">
+                            📭 Aún no hay transacciones. ¡Sé el primero en derrocar el trono!
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Crear tabla HTML
+                let html = `
+                    <table class="tabla-historial">
+                        <thead>
+                            <tr>
+                                <th>📅 Fecha</th>
+                                <th>👤 Usuario</th>
+                                <th>🏷️ Tipo</th>
+                                <th>💰 Monto</th>
+                                <th>📝 Descripción</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                for (const transaccion of historial) {
+                    const fecha = new Date(transaccion.fecha).toLocaleString('es-ES');
+                    const usuario = transaccion.usuario_id?.username || 'Desconocido';
+                    
+                    let tipoClass = '';
+                    let tipoTexto = '';
+                    let montoClass = '';
+                    let montoTexto = '';
+                    
+                    switch (transaccion.tipo) {
+                        case 'derrocamiento':
+                            tipoClass = 'tipo-derrocamiento';
+                            tipoTexto = '⚔️ DERRROCAMIENTO';
+                            montoClass = 'monto-negativo';
+                            montoTexto = `-$${transaccion.monto.toFixed(2)}`;
+                            break;
+                        case 'reembolso':
+                            tipoClass = 'tipo-reembolso';
+                            tipoTexto = '💸 REEMBOLSO';
+                            montoClass = 'monto-positivo';
+                            montoTexto = `+$${transaccion.monto.toFixed(2)}`;
+                            break;
+                        case 'recarga':
+                            tipoClass = 'tipo-recarga';
+                            tipoTexto = '➕ RECARGA';
+                            montoClass = 'monto-positivo';
+                            montoTexto = `+$${transaccion.monto.toFixed(2)}`;
+                            break;
+                        default:
+                            tipoClass = '';
+                            tipoTexto = transaccion.tipo;
+                            montoClass = '';
+                            montoTexto = `$${transaccion.monto.toFixed(2)}`;
+                    }
+                    
+                    html += `
+                        <tr>
+                            <td>${fecha}</td>
+                            <td><strong>${usuario}</strong></td>
+                            <td class="${tipoClass}">${tipoTexto}</td>
+                            <td class="${montoClass}">${montoTexto}</td>
+                            <td>${transaccion.descripcion || '-'}</td>
+                        </tr>
+                    `;
+                }
+                
+                html += `
+                        </tbody>
+                    </table>
+                `;
+                
+                contentDiv.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error cargando historial:', error);
+                contentDiv.innerHTML = `
+                    <div class="empty-message">
+                        ❌ Error al cargar el historial. Intenta nuevamente.
+                    </div>
+                `;
+            }
+        }
+        
+        // Inicializar página
+        document.addEventListener('DOMContentLoaded', () => {
+            actualizarNav();
+            cargarHistorial();
+        });
+    </script>
+</body>
+</html>
