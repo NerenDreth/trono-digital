@@ -16,15 +16,29 @@
     </nav>
 
     <div class="main-content">
-        <div class="stage" style="max-width: 350px;">
+        <div class="stage" style="max-width: 400px;">
             <header>
                 <h2>NUEVO ASPIRANTE</h2>
+                <p style="font-size: 0.8rem; color: var(--text-light);">Completa tus datos para unirte al reino</p>
             </header>
 
             <form id="registroForm">
                 <input type="text" name="username" placeholder="NOMBRE DE GUERRERO" class="input-jojo" required>
                 <input type="email" name="email" placeholder="TU EMAIL" class="input-jojo" required>
                 <input type="password" name="password" placeholder="CONTRASEÑA" class="input-jojo" required>
+                
+                <!-- Campo para foto de perfil -->
+                <div style="margin: 15px 0;">
+                    <label style="display: block; font-size: 0.8rem; margin-bottom: 5px; color: var(--purple-light);">📷 URL DE TU FOTO DE PERFIL</label>
+                    <input type="url" name="foto_perfil" placeholder="https://ejemplo.com/mi-foto.jpg" class="input-jojo">
+                    <p style="font-size: 0.7rem; color: var(--text-dark); margin-top: 5px;">Pega una URL de imagen (opcional, usa una foto por defecto si no pones nada)</p>
+                </div>
+
+                <div id="vistaPrevia" style="text-align: center; margin: 10px 0; display: none;">
+                    <span style="font-size: 0.7rem;">Vista previa:</span>
+                    <div id="previewImg" style="width: 50px; height: 50px; border-radius: 50%; margin: 5px auto; background-size: cover; background-position: center; border: 2px solid var(--purple-light);"></div>
+                </div>
+
                 <button type="submit" class="buy-button" style="width: 100%; margin-top: 20px;">CREAR CUENTA</button>
             </form>
             <div id="mensajeRegistro" style="margin-top: 15px; font-weight: 700; display: none;"></div>
@@ -32,9 +46,30 @@
     </div>
 
     <script>
+        // Vista previa de la foto mientras escriben
+        const fotoInput = document.querySelector('input[name="foto_perfil"]');
+        const vistaPrevia = document.getElementById('vistaPrevia');
+        const previewDiv = document.getElementById('previewImg');
+
+        fotoInput.addEventListener('input', function() {
+            if (this.value && this.value.trim() !== '') {
+                vistaPrevia.style.display = 'block';
+                previewDiv.style.backgroundImage = `url(${this.value})`;
+                previewDiv.style.backgroundSize = 'cover';
+            } else {
+                vistaPrevia.style.display = 'none';
+            }
+        });
+
         document.getElementById('registroForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            const data = Object.fromEntries(new FormData(this));
+            const formData = new FormData(this);
+            const data = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password: formData.get('password'),
+                foto_perfil: formData.get('foto_perfil') || "https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg"
+            };
 
             fetch('/api/registro', {
                 method: 'POST',

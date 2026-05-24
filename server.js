@@ -76,15 +76,31 @@ app.get('/api/trono', async (req, res) => {
     }
 });
 
-// 2. Registro
+// 2. Registro de Usuarios (con bcrypt y foto de perfil)
 app.post('/api/registro', async (req, res) => {
     try {
-        const { username, email, password } = req.body;
-        const existe = await User.findOne({ $or: [{ email }, { username }] });
-        if (existe) return res.send("El usuario o email ya existe.");
+        const { username, email, password, foto_perfil } = req.body;
         
+        // Verificar si ya existe
+        const existe = await User.findOne({ $or: [{ email }, { username }] });
+        if (existe) {
+            return res.send("El usuario o email ya existe.");
+        }
+        
+        // Encriptar contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
-        const nuevoUsuario = new User({ username, email, password: hashedPassword, saldo: 50.00 });
+        
+        // Usar la foto que envió o la por defecto
+        const fotoFinal = foto_perfil || "https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg";
+        
+        const nuevoUsuario = new User({ 
+            username, 
+            email, 
+            password: hashedPassword, 
+            saldo: 50.00,
+            foto_perfil: fotoFinal
+        });
+        
         await nuevoUsuario.save();
         res.send("success");
     } catch (err) {
