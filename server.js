@@ -20,7 +20,8 @@ const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    saldo: { type: Number, default: 0.00 }
+    saldo: { type: Number, default: 0.00 },
+    foto_perfil: { type: String, default: "https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg" }
 }, { versionKey: false });
 
 const ThroneSchema = new mongoose.Schema({
@@ -345,6 +346,22 @@ app.delete('/api/publicaciones/:id', async (req, res) => {
         await Publicacion.findByIdAndDelete(publicacionId);
         res.json({ success: true, mensaje: "Publicación eliminada" });
         
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Actualizar foto de perfil
+app.post('/api/actualizar-foto', async (req, res) => {
+    const { userId, fotoUrl } = req.body;
+    
+    try {
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { foto_perfil: fotoUrl },
+            { new: true }
+        );
+        res.json({ success: true, foto_perfil: user.foto_perfil });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

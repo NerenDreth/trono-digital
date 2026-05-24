@@ -331,3 +331,57 @@ async function verificarSiEsRey() {
     }
 }
 
+// Cambiar foto de perfil
+async function cambiarFotoPerfil() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+        alert("Inicia sesión para cambiar tu foto");
+        return;
+    }
+    
+    const nuevaFoto = prompt("Pega la URL de tu nueva foto de perfil:", localStorage.getItem('foto_perfil') || "");
+    if (nuevaFoto && nuevaFoto.trim()) {
+        try {
+            const response = await fetch('/api/actualizar-foto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId, fotoUrl: nuevaFoto })
+            });
+            const result = await response.json();
+            if (result.success) {
+                localStorage.setItem('foto_perfil', result.foto_perfil);
+                actualizarFotoEnPagina();
+            }
+        } catch (err) {
+            alert("Error al actualizar foto");
+        }
+    }
+}
+
+function actualizarFotoEnPagina() {
+    const foto = localStorage.getItem('foto_perfil') || "https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg";
+    const imgElement = document.querySelector('.portrait-img');
+    if (imgElement) imgElement.src = foto;
+}
+
+// Modificar la función que carga el usuario para también guardar la foto
+async function mostrarSaldo() {
+    const userId = localStorage.getItem('userId');
+    if (userId) {
+        try {
+            const response = await fetch(`/api/user/${userId}`);
+            const user = await response.json();
+            const saldoSpan = document.getElementById('miSaldo');
+            if (saldoSpan) saldoSpan.innerText = `$${user.saldo.toFixed(2)}`;
+            
+            // Guardar foto de perfil
+            if (user.foto_perfil) {
+                localStorage.setItem('foto_perfil', user.foto_perfil);
+                actualizarFotoEnPagina();
+            }
+        } catch (err) {
+            console.error("Error al obtener saldo:", err);
+        }
+    }
+}
+

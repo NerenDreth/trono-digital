@@ -1,18 +1,19 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-    --bg-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    --bg-gradient: linear-gradient(135deg, #f5f0ff 0%, #e8e0f5 50%, #f0eaff 100%);
     --purple-light: #9d4edd;
     --purple-neon: #7b2cbf;
     --purple-dark: #5a189a;
-    --purple-glass: rgba(157, 78, 221, 0.15);
-    --cyan-neon: #00f5d4;
-    --glass-bg: rgba(255, 255, 255, 0.08);
-    --glass-bg-strong: rgba(255, 255, 255, 0.12);
-    --glass-border: rgba(157, 78, 221, 0.3);
-    --text-color: #ffffff;
-    --text-light: rgba(255, 255, 255, 0.7);
-    --text-dark: rgba(255, 255, 255, 0.5);
+    --purple-glass: rgba(157, 78, 221, 0.12);
+    --cyan-neon: #00b4a0;
+    --glass-bg: rgba(255, 255, 255, 0.65);
+    --glass-bg-strong: rgba(255, 255, 255, 0.75);
+    --glass-border: rgba(157, 78, 221, 0.25);
+    --text-color: #2d2d5e;
+    --text-light: #6c6c8a;
+    --text-dark: #9a9ac0;
+    --shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
 }
 
 * {
@@ -29,7 +30,7 @@ body {
     position: relative;
 }
 
-/* Efecto de vidrio en el fondo */
+/* Efecto decorativo */
 body::before {
     content: '';
     position: fixed;
@@ -37,11 +38,11 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 20% 50%, rgba(157, 78, 221, 0.08), transparent 50%);
+    background: radial-gradient(circle at 20% 50%, rgba(157, 78, 221, 0.08), transparent 70%);
     pointer-events: none;
 }
 
-/* Navegación Glassy */
+/* Navegación Glassy Light */
 nav {
     width: 90%;
     max-width: 1200px;
@@ -58,7 +59,7 @@ nav {
     position: sticky;
     top: 20px;
     z-index: 100;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    box-shadow: var(--shadow);
 }
 
 .nav-logo {
@@ -93,7 +94,7 @@ nav {
     background: var(--purple-light);
     color: white;
     transform: scale(1.05);
-    box-shadow: 0 0 15px rgba(157, 78, 221, 0.5);
+    box-shadow: 0 0 15px rgba(157, 78, 221, 0.3);
 }
 
 /* Contenedor principal */
@@ -105,36 +106,36 @@ nav {
     padding: 20px;
 }
 
-/* Tarjeta del Trono - Glassy premium */
+/* Tarjeta del Trono - Glassy Light Premium */
 .stage {
     text-align: center;
     width: 100%;
-    max-width: 500px;
+    max-width: 550px;
     padding: 35px;
     background: var(--glass-bg-strong);
     backdrop-filter: blur(25px);
     -webkit-backdrop-filter: blur(25px);
     border: 1px solid var(--glass-border);
     border-radius: 48px;
-    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    box-shadow: var(--shadow);
 }
 
-/* Contenedor de saldo */
+/* Barra de saldo */
 .saldo-container {
-    background: rgba(157, 78, 221, 0.2);
+    background: rgba(157, 78, 221, 0.12);
     border-radius: 60px;
     padding: 10px 20px;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     backdrop-filter: blur(10px);
-    border: 1px solid rgba(157, 78, 221, 0.3);
+    border: 1px solid rgba(157, 78, 221, 0.2);
 }
 
 .saldo-label {
     font-weight: 600;
-    color: var(--cyan-neon);
+    color: var(--purple-neon);
 }
 
 .saldo-valor {
@@ -143,24 +144,35 @@ nav {
     color: var(--purple-light);
 }
 
-/* Título del rey */
+/* Título */
 h1 {
-    font-size: 2.2rem;
-    margin: 20px 0;
-    text-shadow: 0 0 20px rgba(157, 78, 221, 0.5);
-    letter-spacing: 2px;
+    font-size: 2rem;
+    margin: 15px 0;
+    background: linear-gradient(135deg, var(--purple-neon), var(--cyan-neon));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    letter-spacing: 1px;
 }
 
-/* Marco del retrato */
+/* Marco del retrato - Ahora para foto de perfil */
 .portrait-frame {
-    width: 160px;
-    height: 160px;
-    margin: 0 auto 20px;
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 15px;
     border-radius: 50%;
     border: 3px solid var(--purple-light);
     overflow: hidden;
-    box-shadow: 0 0 30px rgba(157, 78, 221, 0.4);
-    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 20px rgba(157, 78, 221, 0.2);
+    background: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.portrait-frame:hover {
+    transform: scale(1.02);
+    border-color: var(--cyan-neon);
 }
 
 .portrait-img {
@@ -169,13 +181,32 @@ h1 {
     object-fit: cover;
 }
 
+/* Overlay para cambiar foto */
+.foto-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    font-size: 10px;
+    text-align: center;
+    padding: 4px;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.portrait-frame:hover .foto-overlay {
+    opacity: 1;
+}
+
 /* Precio */
 .price-label {
-    font-size: 2.8rem;
+    font-size: 2.5rem;
     font-weight: 800;
     color: var(--purple-light);
-    margin: 15px 0;
-    text-shadow: 0 0 15px rgba(157, 78, 221, 0.5);
+    margin: 10px 0;
+    text-shadow: 0 2px 10px rgba(157, 78, 221, 0.2);
 }
 
 /* Botón principal */
@@ -183,33 +214,38 @@ h1 {
     background: linear-gradient(135deg, var(--purple-neon), var(--purple-dark));
     color: white;
     border: none;
-    padding: 14px 40px;
-    font-size: 1.1rem;
+    padding: 12px 35px;
+    font-size: 1rem;
     font-weight: 700;
     border-radius: 50px;
     cursor: pointer;
     text-transform: uppercase;
-    box-shadow: 0 5px 20px rgba(123, 44, 191, 0.4);
+    box-shadow: 0 4px 15px rgba(123, 44, 191, 0.3);
     transition: all 0.3s ease;
-    margin: 15px 0;
+    margin: 10px 0;
 }
 
 .buy-button:hover {
-    transform: scale(1.05);
-    box-shadow: 0 8px 30px rgba(157, 78, 221, 0.6);
+    transform: scale(1.03);
+    box-shadow: 0 6px 20px rgba(157, 78, 221, 0.4);
     background: linear-gradient(135deg, var(--purple-light), var(--purple-neon));
 }
 
-/* Footer texto */
+.recarga-btn {
+    background: linear-gradient(135deg, var(--cyan-neon), #008c7a);
+    font-size: 0.75rem;
+    padding: 6px 15px;
+}
+
 .footer-text {
-    margin: 15px 0;
-    font-size: 0.9rem;
+    margin: 10px 0;
+    font-size: 0.85rem;
     color: var(--text-light);
 }
 
-/* ========== SECCIÓN DE PUBLICACIONES ========== */
+/* ========== SECCIÓN PUBLICACIONES ========== */
 .publicaciones-section {
-    margin-top: 30px;
+    margin-top: 25px;
     text-align: left;
     border-top: 1px solid var(--glass-border);
     padding-top: 20px;
@@ -219,25 +255,22 @@ h1 {
     text-align: center;
     color: var(--purple-light);
     margin-bottom: 15px;
-    font-size: 1.1rem;
+    font-size: 1rem;
     letter-spacing: 2px;
 }
 
-/* Contenedor de mensajes */
 #listaPublicaciones {
-    max-height: 280px;
+    max-height: 250px;
     overflow-y: auto;
     margin-bottom: 15px;
-    padding-right: 5px;
 }
 
-/* Scroll personalizado */
 #listaPublicaciones::-webkit-scrollbar {
-    width: 5px;
+    width: 4px;
 }
 
 #listaPublicaciones::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(157, 78, 221, 0.1);
     border-radius: 10px;
 }
 
@@ -246,20 +279,13 @@ h1 {
     border-radius: 10px;
 }
 
-/* Cada publicación */
 .publicacion-item {
-    background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(5px);
     border-radius: 20px;
-    padding: 14px;
-    margin-bottom: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
     border: 1px solid rgba(157, 78, 221, 0.2);
-    transition: all 0.2s ease;
-}
-
-.publicacion-item:hover {
-    border-color: rgba(157, 78, 221, 0.5);
-    background: rgba(255, 255, 255, 0.08);
 }
 
 .publicacion-header {
@@ -271,54 +297,37 @@ h1 {
 
 .publicacion-rey {
     font-weight: 700;
-    color: var(--purple-light);
+    color: var(--purple-neon);
+    font-size: 0.85rem;
 }
 
 .publicacion-fecha {
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--text-dark);
 }
 
 .publicacion-contenido {
     word-wrap: break-word;
-    line-height: 1.4;
+    font-size: 0.9rem;
     color: var(--text-color);
 }
 
-.publicacion-eliminar {
-    background: none;
-    border: none;
-    color: #ff6b6b;
-    cursor: pointer;
-    font-size: 1rem;
-    opacity: 0.6;
-    transition: opacity 0.2s;
-}
-
-.publicacion-eliminar:hover {
-    opacity: 1;
-}
-
-/* Formulario de publicación */
+/* Formulario publicación */
 #formPublicar {
     margin-top: 15px;
-    padding: 15px;
-    background: rgba(157, 78, 221, 0.1);
-    backdrop-filter: blur(10px);
-    border-radius: 24px;
-    border: 1px solid rgba(157, 78, 221, 0.2);
+    display: none;
 }
 
 #contenidoPublicacion {
     width: 100%;
     padding: 12px;
-    border-radius: 16px;
+    border-radius: 20px;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.8);
     color: var(--text-color);
     resize: vertical;
     font-family: inherit;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
 }
 
 #contenidoPublicacion:focus {
@@ -326,37 +335,29 @@ h1 {
     border-color: var(--purple-light);
 }
 
+.publicar-input-group {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
 #enlacePublicacion {
     flex: 1;
     padding: 10px;
-    border-radius: 16px;
+    border-radius: 20px;
     border: 1px solid var(--glass-border);
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--text-color);
-    font-size: 0.85rem;
-}
-
-#enlacePublicacion:focus {
-    outline: none;
-    border-color: var(--purple-light);
-}
-
-/* Botón de recarga */
-.recarga-btn {
-    background: linear-gradient(135deg, var(--cyan-neon), #00b4a0);
-    border: none;
+    background: rgba(255, 255, 255, 0.8);
     font-size: 0.8rem;
-    padding: 8px 15px;
 }
 
-/* ========== MODAL ========== */
+/* Modal */
 .modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.6);
+    background: rgba(0, 0, 0, 0.3);
     backdrop-filter: blur(8px);
     display: none;
     justify-content: center;
@@ -371,73 +372,31 @@ h1 {
     border-radius: 40px;
     padding: 35px;
     width: 380px;
-    box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+    box-shadow: var(--shadow);
 }
 
-.modal-content h2 {
-    text-align: center;
-    color: var(--purple-light);
-    margin-bottom: 20px;
-}
-
-.close-modal {
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-    cursor: pointer;
-    color: var(--text-light);
-    background: none;
-    border: none;
-}
-
-.close-modal:hover {
-    color: var(--purple-light);
-}
-
-/* Inputs */
 .input-jojo {
     width: 100%;
     padding: 14px;
     margin: 10px 0;
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.8);
     border: 1px solid var(--glass-border);
     border-radius: 20px;
-    color: var(--text-color);
     font-size: 0.9rem;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
-.input-jojo:focus {
-    border-color: var(--purple-light);
-    box-shadow: 0 0 0 3px rgba(157, 78, 221, 0.2);
 }
 
 /* Responsive */
 @media (max-width: 550px) {
     .stage {
         margin: 0 15px;
-        padding: 25px;
+        padding: 20px;
     }
     
     h1 {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
     }
     
     .price-label {
-        font-size: 2.2rem;
-    }
-    
-    .nav-auth-btns {
-        gap: 5px;
-    }
-    
-    .btn-nav {
-        padding: 5px 12px;
-        font-size: 0.7rem;
-    }
-    
-    .nav-logo {
-        font-size: 1rem;
+        font-size: 2rem;
     }
 }
