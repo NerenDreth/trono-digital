@@ -9,13 +9,12 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(__dirname));
 
-// ✅ CONEXIÓN CORRECTA (TODO EN UNA SOLA LÍNEA dentro del connect)
+// CONEXIÓN A MONGODB ATLAS
 mongoose.connect('mongodb+srv://luisomarez_db_user:GEfmJDj2wJZm3Ka8@trono-cluster.qvzibea.mongodb.net/trono_db?retryWrites=true&w=majority')
     .then(() => console.log('Conectado exitosamente a MongoDB'))
     .catch(err => console.error('Error al conectar MongoDB:', err));
 
-// ... el resto de tu código (modelos, rutas, etc.)
-// MODELOS DE DATOS (Esquemas NoSQL con relaciones embebidas)
+// MODELOS DE DATOS
 const UserSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
@@ -28,12 +27,12 @@ const ThroneSchema = new mongoose.Schema({
     id_trono: { type: String, default: "principal" },
     rey_actual: {
         user_id: mongoose.Schema.Types.ObjectId,
-        username: { type: String, default: "NADIE" }
+        username: { type: String, default: "NADIE" },
+        foto_perfil: { type: String, default: "https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg" }
     },
     precio_actual: { type: Number, default: 1.00 }
 }, { versionKey: false });
 
-// MODELO DE TRANSACCIONES
 const TransactionSchema = new mongoose.Schema({
     usuario_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     tipo: { type: String, enum: ['derrocamiento', 'reembolso', 'recarga'] },
@@ -42,30 +41,34 @@ const TransactionSchema = new mongoose.Schema({
     fecha: { type: Date, default: Date.now }
 }, { versionKey: false });
 
-// MODELO DE PUBLICACIONES DEL TRONO
 const PublicacionSchema = new mongoose.Schema({
     rey_id: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     rey_username: { type: String, required: true },
     contenido: { type: String, required: true },
-    tipo: { type: String, default: 'texto' }, // texto, enlace
-    enlace: { type: String }, // si es un enlace (YouTube, etc.)
+    tipo: { type: String, default: 'texto' },
+    enlace: { type: String },
     fecha: { type: Date, default: Date.now }
 }, { versionKey: false });
 
 const Publicacion = mongoose.model('Publicacion', PublicacionSchema);
-
 const User = mongoose.model('User', UserSchema);
 const Throne = mongoose.model('Throne', ThroneSchema);
 const Transaction = mongoose.model('Transaction', TransactionSchema);
 
-// ========== RUTAS / ENDPOINTS API ==========
+// ========== RUTAS API ==========
 
 // 1. Obtener estado del Trono
 app.get('/api/trono', async (req, res) => {
     try {
         let trono = await Throne.findOne({ id_trono: "principal" });
         if (!trono) {
-            trono = await Throne.create({ id_trono: "principal" });
+            trono = await Throne.create({ 
+                id_trono: "principal",
+                rey_actual: {
+                    username: "NADIE",
+                    foto_perfil: "https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg"
+                }
+            });
         }
         res.json(trono);
     } catch (err) {
@@ -73,27 +76,15 @@ app.get('/api/trono', async (req, res) => {
     }
 });
 
-// 2. Registro de Usuarios (con bcrypt)
+// 2. Registro
 app.post('/api/registro', async (req, res) => {
     try {
         const { username, email, password } = req.body;
-        
-        // Verificar si ya existe
         const existe = await User.findOne({ $or: [{ email }, { username }] });
-        if (existe) {
-            return res.send("El usuario o email ya existe.");
-        }
+        if (existe) return res.send("El usuario o email ya existe.");
         
-        // Encriptar contraseña
         const hashedPassword = await bcrypt.hash(password, 10);
-        
-        const nuevoUsuario = new User({ 
-            username, 
-            email, 
-            password: hashedPassword, 
-            saldo: 50.00 
-        });
-        
+        const nuevoUsuario = new User({ username, email, password: hashedPassword, saldo: 50.00 });
         await nuevoUsuario.save();
         res.send("success");
     } catch (err) {
@@ -102,12 +93,11 @@ app.post('/api/registro', async (req, res) => {
     }
 });
 
-// 3. Login de Usuarios (con bcrypt)
+// 3. Login
 app.post('/api/login', async (req, res) => {
     try {
         const { email, password } = req.body;
         const usuario = await User.findOne({ email });
-        
         if (usuario && await bcrypt.compare(password, usuario.password)) {
             res.json({ status: "success", username: usuario.username, id: usuario._id });
         } else {
@@ -118,26 +108,18 @@ app.post('/api/login', async (req, res) => {
     }
 });
 
-// 4. Derrocar al rey (SIN transacciones - para MongoDB standalone)
+// 4. Derrocar al rey
 app.post('/api/derrocar', async (req, res) => {
     const { userId } = req.body;
-    
-    if (!userId) {
-        return res.status(400).json({ error: "Usuario no identificado" });
-    }
+    if (!userId) return res.status(400).json({ error: "Usuario no identificado" });
     
     try {
         const usurpador = await User.findById(userId);
-        if (!usurpador) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
-        }
+        if (!usurpador) return res.status(404).json({ error: "Usuario no encontrado" });
         
         let trono = await Throne.findOne({ id_trono: "principal" });
-        if (!trono) {
-            trono = await Throne.create({ id_trono: "principal", precio_actual: 1.00 });
-        }
+        if (!trono) trono = await Throne.create({ id_trono: "principal", precio_actual: 1.00 });
         
-        // Validación: No derrocarse a sí mismo
         if (trono.rey_actual.user_id && trono.rey_actual.user_id.toString() === userId) {
             return res.status(400).json({ error: "¡No puedes derrocarte a ti mismo!" });
         }
@@ -146,9 +128,7 @@ app.post('/api/derrocar', async (req, res) => {
         const precioDerrocamiento = precioActual * 2;
         
         if (usurpador.saldo < precioDerrocamiento) {
-            return res.status(400).json({ 
-                error: `Saldo insuficiente. Necesitas $${precioDerrocamiento.toFixed(2)}, tienes $${usurpador.saldo.toFixed(2)}` 
-            });
+            return res.status(400).json({ error: `Saldo insuficiente. Necesitas $${precioDerrocamiento.toFixed(2)}` });
         }
         
         let reyAnterior = null;
@@ -158,47 +138,42 @@ app.post('/api/derrocar', async (req, res) => {
             reembolso = precioActual / 2;
         }
         
-        // === OPERACIONES ATÓMICAS SIMULADAS ===
-        // Como no tenemos transacciones, hacemos las operaciones en orden
-        // y verificamos que no haya errores intermedios
-        
-        // 1. Cobrar al usurpador
+        // Cobrar al usurpador
         usurpador.saldo -= precioDerrocamiento;
         await usurpador.save();
         
-        // 2. Reembolsar al rey anterior (si existe)
+        // Reembolsar al rey anterior
         if (reyAnterior) {
             reyAnterior.saldo += reembolso;
             await reyAnterior.save();
         }
         
-        // 3. Actualizar el trono
+        // Actualizar el trono (INCLUYENDO LA FOTO)
         trono.precio_actual = precioDerrocamiento;
         trono.rey_actual = {
             user_id: usurpador._id,
-            username: usurpador.username
+            username: usurpador.username,
+            foto_perfil: usurpador.foto_perfil
         };
         await trono.save();
         
-        // Guardar transacciones en historial
-        if (Transaction) {
-            const transaccionDerrocar = new Transaction({
-                usuario_id: usurpador._id,
-                tipo: 'derrocamiento',
-                monto: precioDerrocamiento,
-                descripcion: `Derrocó a ${reyAnterior ? reyAnterior.username : 'NADIE'} por $${precioDerrocamiento}`
+        // Guardar transacciones
+        const transaccionDerrocar = new Transaction({
+            usuario_id: usurpador._id,
+            tipo: 'derrocamiento',
+            monto: precioDerrocamiento,
+            descripcion: `Derrocó a ${reyAnterior ? reyAnterior.username : 'NADIE'} por $${precioDerrocamiento}`
+        });
+        await transaccionDerrocar.save();
+        
+        if (reyAnterior) {
+            const transaccionReembolso = new Transaction({
+                usuario_id: reyAnterior._id,
+                tipo: 'reembolso',
+                monto: reembolso,
+                descripcion: `Recibió reembolso por ser destronado: $${reembolso}`
             });
-            await transaccionDerrocar.save();
-            
-            if (reyAnterior) {
-                const transaccionReembolso = new Transaction({
-                    usuario_id: reyAnterior._id,
-                    tipo: 'reembolso',
-                    monto: reembolso,
-                    descripcion: `Recibió reembolso por ser destronado: $${reembolso}`
-                });
-                await transaccionReembolso.save();
-            }
+            await transaccionReembolso.save();
         }
         
         res.json({
@@ -215,18 +190,14 @@ app.post('/api/derrocar', async (req, res) => {
     }
 });
 
-// 5. Agregar saldo (para pruebas)
+// 5. Recargar saldo
 app.post('/api/add-funds', async (req, res) => {
     const { userId, amount } = req.body;
-    
     try {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ error: "Usuario no encontrado" });
-        
         user.saldo += amount;
         await user.save();
-        
-        // Guardar transacción de recarga
         const transaccion = new Transaction({
             usuario_id: user._id,
             tipo: 'recarga',
@@ -234,7 +205,6 @@ app.post('/api/add-funds', async (req, res) => {
             descripcion: `Recarga de saldo: $${amount}`
         });
         await transaccion.save();
-        
         res.json({ success: true, nuevoSaldo: user.saldo });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -252,122 +222,88 @@ app.get('/api/user/:id', async (req, res) => {
     }
 });
 
-// 7. Obtener historial de transacciones
+// 7. Historial de transacciones
 app.get('/api/historial', async (req, res) => {
     try {
-        const historial = await Transaction.find()
-            .sort({ fecha: -1 })
-            .limit(20)
-            .populate('usuario_id', 'username');
+        const historial = await Transaction.find().sort({ fecha: -1 }).limit(20).populate('usuario_id', 'username');
         res.json(historial);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// ========== RUTAS DE PUBLICACIONES ==========
-
-// 8. Obtener todas las publicaciones del trono
+// 8. Obtener publicaciones
 app.get('/api/publicaciones', async (req, res) => {
     try {
-        const publicaciones = await Publicacion.find()
-            .sort({ fecha: -1 })
-            .limit(30);
+        const publicaciones = await Publicacion.find().sort({ fecha: -1 }).limit(30);
         res.json(publicaciones);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// 9. El rey publica un mensaje (solo si ES el rey actual)
+// 9. Publicar mensaje
 app.post('/api/publicar', async (req, res) => {
     const { userId, contenido, tipo, enlace } = req.body;
-    
-    if (!userId || !contenido) {
-        return res.status(400).json({ error: "Faltan datos" });
-    }
+    if (!userId || !contenido) return res.status(400).json({ error: "Faltan datos" });
     
     try {
-        // Verificar que el usuario existe
         const usuario = await User.findById(userId);
-        if (!usuario) {
-            return res.status(404).json({ error: "Usuario no encontrado" });
-        }
+        if (!usuario) return res.status(404).json({ error: "Usuario no encontrado" });
         
-        // Verificar que el usuario ES el rey actual
         const trono = await Throne.findOne({ id_trono: "principal" });
         if (!trono || trono.rey_actual.user_id?.toString() !== userId) {
-            return res.status(403).json({ error: "Solo el rey actual puede publicar en el trono" });
+            return res.status(403).json({ error: "Solo el rey actual puede publicar" });
         }
         
-        // Crear la publicación
         const nuevaPublicacion = new Publicacion({
             rey_id: userId,
             rey_username: usuario.username,
-            contenido: contenido,
+            contenido,
             tipo: tipo || 'texto',
             enlace: enlace || null
         });
-        
         await nuevaPublicacion.save();
-        
-        res.json({ 
-            success: true, 
-            mensaje: "Publicado en el trono",
-            publicacion: nuevaPublicacion
-        });
-        
+        res.json({ success: true, publicacion: nuevaPublicacion });
     } catch (err) {
-        console.error("Error al publicar:", err);
         res.status(500).json({ error: "Error al publicar: " + err.message });
     }
 });
 
-// 10. Eliminar publicación (solo el rey actual o el que publicó)
+// 10. Eliminar publicación
 app.delete('/api/publicaciones/:id', async (req, res) => {
     const { userId } = req.body;
     const publicacionId = req.params.id;
-    
     try {
         const publicacion = await Publicacion.findById(publicacionId);
-        if (!publicacion) {
-            return res.status(404).json({ error: "Publicación no encontrada" });
-        }
+        if (!publicacion) return res.status(404).json({ error: "Publicación no encontrada" });
         
-        // Verificar que quien borra es el rey actual O el autor
         const trono = await Throne.findOne({ id_trono: "principal" });
         const esReyActual = trono?.rey_actual.user_id?.toString() === userId;
         const esAutor = publicacion.rey_id.toString() === userId;
         
         if (!esReyActual && !esAutor) {
-            return res.status(403).json({ error: "No tienes permiso para borrar esto" });
+            return res.status(403).json({ error: "No tienes permiso" });
         }
-        
         await Publicacion.findByIdAndDelete(publicacionId);
-        res.json({ success: true, mensaje: "Publicación eliminada" });
-        
+        res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Actualizar foto de perfil
+// 11. Actualizar foto de perfil
 app.post('/api/actualizar-foto', async (req, res) => {
     const { userId, fotoUrl } = req.body;
-    
     try {
-        const user = await User.findByIdAndUpdate(
-            userId,
-            { foto_perfil: fotoUrl },
-            { new: true }
-        );
+        const user = await User.findByIdAndUpdate(userId, { foto_perfil: fotoUrl }, { new: true });
         res.json({ success: true, foto_perfil: user.foto_perfil });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
 
-// Levantar Servidor
+// Iniciar servidor
 app.listen(3000, () => {
     console.log('Servidor corriendo en http://localhost:3000');
 });

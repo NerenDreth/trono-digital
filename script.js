@@ -15,11 +15,8 @@ function actualizarUIPorSesion() {
             <button class="btn-nav" onclick="window.location.href='historial.html'">📜 Historial</button>
             <button class="btn-nav" onclick="logout()" style="margin-left:15px;">Salir</button>
         `;
-        
         if (modal) modal.style.display = 'none';
         mostrarSaldo();
-        
-        // ✅ CARGAR PUBLICACIONES Y VERIFICAR SI ES REY
         cargarPublicaciones();
         verificarSiEsRey();
     } else {
@@ -27,7 +24,6 @@ function actualizarUIPorSesion() {
             <button class="btn-nav" onclick="toggleModal()">Entrar</button>
             <button class="btn-nav" style="border-color: #6c5ce7;" onclick="window.location.href='registro.html'">Unirse</button>
         `;
-        // Si no hay sesión, igual mostrar publicaciones (solo lectura)
         cargarPublicaciones();
     }
 }
@@ -40,14 +36,10 @@ function logout() {
 function toggleModal() {
     const modal = document.getElementById('loginModal');
     const username = localStorage.getItem('username');
-    
-    // Si ya está logueado, no mostrar el modal
     if (username) {
         alert("Ya has iniciado sesión como " + username);
         return;
     }
-    
-    // Alternar visibilidad del modal
     if (modal.style.display === 'flex') {
         modal.style.display = 'none';
     } else {
@@ -62,6 +54,13 @@ function fetchTrono() {
             const nombreRey = trono.rey_actual.username || "NADIE";
             document.getElementById('reyNombre').innerText = nombreRey.toUpperCase();
             document.getElementById('reyPrecio').innerText = `$${trono.precio_actual.toFixed(2)}`;
+            
+            // Mostrar la foto del rey actual en el trono
+            const fotoRey = trono.rey_actual.foto_perfil || "https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg";
+            const imgElement = document.querySelector('.portrait-img');
+            if (imgElement) {
+                imgElement.src = fotoRey;
+            }
             
             const proximo = trono.precio_actual * 2;
             document.getElementById('detallesPrecio').innerHTML = `💰 Precio para derrocar: $${proximo.toFixed(2)}`;
@@ -84,12 +83,8 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
         if(resData.status === "success") {
             localStorage.setItem('username', resData.username);
             localStorage.setItem('userId', resData.id);
-            
-            // Cerrar modal
             document.getElementById('loginModal').style.display = 'none';
-            // Actualizar UI
             actualizarUIPorSesion();
-            // Recargar datos del trono
             fetchTrono();
         } else {
             alert("Credenciales incorrectas.");
@@ -100,7 +95,6 @@ document.getElementById('loginForm').addEventListener('submit', function(e) {
 // Derrocar
 async function derrocar() {
     const userId = localStorage.getItem('userId');
-    
     if (!userId) {
         alert("Debes iniciar sesión para derrocar al rey.");
         toggleModal();
@@ -118,14 +112,11 @@ async function derrocar() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId })
         });
-        
         const result = await response.json();
         
         if (result.success) {
             alert(`✨ ¡${result.nuevoRey.toUpperCase()} ha tomado el trono! ✨\n\n👑 Nuevo precio: $${result.nuevoPrecio.toFixed(2)}\n💰 Tu saldo restante: $${result.saldoRestante.toFixed(2)}`);
             fetchTrono();
-            
-            // Actualizar saldo
             const userRes = await fetch(`/api/user/${userId}`);
             const userData = await userRes.json();
             localStorage.setItem('saldo', userData.saldo);
@@ -141,26 +132,22 @@ async function derrocar() {
     }
 }
 
-// Conectar botón derrocar
 document.addEventListener('DOMContentLoaded', () => {
     const btn = document.getElementById('btnDerrocar');
     if (btn) btn.onclick = derrocar;
 });
 
-// Recargar saldo
 async function recargarSaldo() {
     const userId = localStorage.getItem('userId');
     if (!userId) {
         alert("Inicia sesión primero");
         return;
     }
-    
     const response = await fetch('/api/add-funds', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId, amount: 50 })
     });
-    
     const result = await response.json();
     if (result.success) {
         alert(`💰 Nuevo saldo: $${result.nuevoSaldo.toFixed(2)}`);
@@ -176,6 +163,10 @@ async function mostrarSaldo() {
             const user = await response.json();
             const saldoSpan = document.getElementById('miSaldo');
             if (saldoSpan) saldoSpan.innerText = `$${user.saldo.toFixed(2)}`;
+            if (user.foto_perfil) {
+                localStorage.setItem('foto_perfil', user.foto_perfil);
+                actualizarFotoEnPagina();
+            }
         } catch (err) {
             console.error("Error al obtener saldo:", err);
         }
@@ -184,7 +175,6 @@ async function mostrarSaldo() {
 
 // ========== FUNCIONES DE PUBLICACIONES ==========
 
-// Cargar y mostrar publicaciones
 async function cargarPublicaciones() {
     const contenedor = document.getElementById('listaPublicaciones');
     if (!contenedor) return;
@@ -205,15 +195,9 @@ async function cargarPublicaciones() {
             
             let contenidoHtml = '';
             if (pub.tipo === 'enlace' && pub.enlace) {
-                // Si es un enlace, mostrarlo embebido o como link
                 if (pub.enlace.includes('youtube.com/watch') || pub.enlace.includes('youtu.be')) {
-                    // Embed de YouTube
                     let videoId = pub.enlace.split('v=')[1]?.split('&')[0] || pub.enlace.split('/').pop();
-                    contenidoHtml = `
-                        <div style="margin-top: 8px;">
-                            <iframe width="100%" height="180" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius: 12px;"></iframe>
-                        </div>
-                    `;
+                    contenidoHtml = `<div style="margin-top: 8px;"><iframe width="100%" height="180" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen style="border-radius: 12px;"></iframe></div>`;
                 } else {
                     contenidoHtml = `<div style="margin-top: 8px;"><a href="${pub.enlace}" target="_blank" style="color: var(--cyan-neon);">🔗 ${pub.enlace}</a></div>`;
                 }
@@ -234,52 +218,43 @@ async function cargarPublicaciones() {
             `;
         }
         contenedor.innerHTML = html;
-        
     } catch (err) {
         console.error("Error cargando publicaciones:", err);
         contenedor.innerHTML = '<div style="text-align: center; padding: 20px; color: red;">❌ Error al cargar mensajes</div>';
     }
 }
 
-// Función para escapar HTML (seguridad)
 function escapeHtml(texto) {
     const div = document.createElement('div');
     div.textContent = texto;
     return div.innerHTML;
 }
 
-// Publicar en el trono
 async function publicarEnTrono() {
     const userId = localStorage.getItem('userId');
     if (!userId) {
         alert("Debes iniciar sesión para publicar");
         return;
     }
-    
     const contenido = document.getElementById('contenidoPublicacion').value.trim();
     const enlace = document.getElementById('enlacePublicacion').value.trim();
-    
     if (!contenido) {
         alert("Escribe un mensaje");
         return;
     }
-    
     const tipo = enlace ? 'enlace' : 'texto';
-    
     try {
         const response = await fetch('/api/publicar', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId, contenido, tipo, enlace: enlace || null })
         });
-        
         const result = await response.json();
-        
         if (result.success) {
             alert("✅ Mensaje publicado en el trono");
             document.getElementById('contenidoPublicacion').value = '';
             document.getElementById('enlacePublicacion').value = '';
-            cargarPublicaciones(); // Recargar
+            cargarPublicaciones();
         } else {
             alert("❌ " + result.error);
         }
@@ -289,19 +264,15 @@ async function publicarEnTrono() {
     }
 }
 
-// Eliminar publicación
 async function eliminarPublicacion(publicacionId) {
     if (!confirm("¿Eliminar este mensaje?")) return;
-    
     const userId = localStorage.getItem('userId');
-    
     try {
         const response = await fetch(`/api/publicaciones/${publicacionId}`, {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ userId })
         });
-        
         const result = await response.json();
         if (result.success) {
             cargarPublicaciones();
@@ -313,17 +284,13 @@ async function eliminarPublicacion(publicacionId) {
     }
 }
 
-// Mostrar/ocultar formulario de publicación según si es rey
 async function verificarSiEsRey() {
     const userId = localStorage.getItem('userId');
     const formPublicar = document.getElementById('formPublicar');
-    
     if (!userId || !formPublicar) return;
-    
     try {
         const response = await fetch('/api/trono');
         const trono = await response.json();
-        
         const esRey = trono.rey_actual.user_id && trono.rey_actual.user_id.toString() === userId;
         formPublicar.style.display = esRey ? 'block' : 'none';
     } catch (err) {
@@ -331,14 +298,12 @@ async function verificarSiEsRey() {
     }
 }
 
-// Cambiar foto de perfil
 async function cambiarFotoPerfil() {
     const userId = localStorage.getItem('userId');
     if (!userId) {
         alert("Inicia sesión para cambiar tu foto");
         return;
     }
-    
     const nuevaFoto = prompt("Pega la URL de tu nueva foto de perfil:", localStorage.getItem('foto_perfil') || "");
     if (nuevaFoto && nuevaFoto.trim()) {
         try {
@@ -351,6 +316,8 @@ async function cambiarFotoPerfil() {
             if (result.success) {
                 localStorage.setItem('foto_perfil', result.foto_perfil);
                 actualizarFotoEnPagina();
+                // Si eres el rey, actualiza también la foto del trono
+                fetchTrono();
             }
         } catch (err) {
             alert("Error al actualizar foto");
@@ -361,27 +328,8 @@ async function cambiarFotoPerfil() {
 function actualizarFotoEnPagina() {
     const foto = localStorage.getItem('foto_perfil') || "https://img.freepik.com/vector-premium/caricatura-rey-su-corona_167995-623.jpg";
     const imgElement = document.querySelector('.portrait-img');
-    if (imgElement) imgElement.src = foto;
-}
-
-// Modificar la función que carga el usuario para también guardar la foto
-async function mostrarSaldo() {
-    const userId = localStorage.getItem('userId');
-    if (userId) {
-        try {
-            const response = await fetch(`/api/user/${userId}`);
-            const user = await response.json();
-            const saldoSpan = document.getElementById('miSaldo');
-            if (saldoSpan) saldoSpan.innerText = `$${user.saldo.toFixed(2)}`;
-            
-            // Guardar foto de perfil
-            if (user.foto_perfil) {
-                localStorage.setItem('foto_perfil', user.foto_perfil);
-                actualizarFotoEnPagina();
-            }
-        } catch (err) {
-            console.error("Error al obtener saldo:", err);
-        }
+    if (imgElement && imgElement.parentElement.classList.contains('portrait-frame')) {
+        imgElement.src = foto;
     }
 }
 
